@@ -1,0 +1,1 @@
+using command: python -m tensorboard.main --logdir=./directory  to run tensorboard

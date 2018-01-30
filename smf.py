@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
+
 def weight_variable(shape, name):
     initial = tf.truncated_normal(shape, stddev=0.001)
     return tf.Variable(initial, name=name)
@@ -42,7 +43,8 @@ class SMF:
         self.RMSE = tf.sqrt(tf.losses.mean_squared_error(self.r, self.r_hat))
         self.l2_loss = tf.nn.l2_loss(tf.subtract(self.r, self.r_hat))
         self.MAE = tf.reduce_mean(tf.abs(tf.subtract(self.r, self.r_hat)))
-        self.reg = tf.add(tf.multiply(self.reg_lambda, tf.nn.l2_loss(self.U)), tf.multiply(self.reg_lambda, tf.nn.l2_loss(self.V)))
+        self.reg = tf.add(tf.multiply(self.reg_lambda, tf.nn.l2_loss(self.U)),
+                          tf.multiply(self.reg_lambda, tf.nn.l2_loss(self.V)))
         self.reg_loss = tf.add(self.l2_loss, self.reg)
 
         self.optimizer = tf.train.AdamOptimizer(self.learning_rate)
@@ -62,7 +64,7 @@ class SMF:
         self.saver = tf.train.Saver()
 
     def construct_feeddict(self, u_idx, v_idx, M):
-        return {self.u_idx:u_idx, self.v_idx:v_idx, self.r:M[u_idx, v_idx]}
+        return {self.u_idx: u_idx, self.v_idx: v_idx, self.r: M[u_idx, v_idx]}
 
     def train_test_validation(self, M, train_idx, test_idx, valid_idx, n_steps=100000, result_path='result/'):
         nonzero_u_idx = M.nonzero()[0]
