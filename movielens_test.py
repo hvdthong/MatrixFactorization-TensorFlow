@@ -17,6 +17,7 @@ reg_lambdas = [0, 1e-5, 1e-3, 1e-1, 1]
 learning_rates = [0.001, 0.0001]
 latent_dims = [25, 50, 100]
 
+
 def read_dataset():
     M = np.zeros([num_user, num_item])
     with open('./data/ml-100k/u.data', 'r') as f:
@@ -39,25 +40,31 @@ def train_test_validation():
 
     train_prop = 0.9
     valid_prop = train_prop * 0.05
-    train_idx = idx[:int((train_prop-valid_prop) * num_rating)]
-    valid_idx = idx[int((train_prop-valid_prop) * num_rating):int(train_prop * num_rating)]
+    train_idx = idx[:int((train_prop - valid_prop) * num_rating)]
+    valid_idx = idx[int((train_prop - valid_prop) * num_rating):int(train_prop * num_rating)]
     test_idx = idx[int(0.9 * num_rating):]
 
-    for learning_rate, batch_size, reg_lambda, latent_dim in itertools.product(learning_rates, batch_sizes, reg_lambdas, latent_dims):
+    for learning_rate, batch_size, reg_lambda, latent_dim in itertools.product(learning_rates, batch_sizes, reg_lambdas,
+                                                                               latent_dims):
         result_path = "{0}_{1}_{2}_{3}".format(learning_rate, batch_size, reg_lambda, latent_dim)
         if not os.path.exists(result_path + "/model.ckpt.index"):
             config = tf.ConfigProto()
-            config.gpu_options.allow_growth=True
+            config.gpu_options.allow_growth = True
             with tf.Session(config=config) as sess:
                 n_steps = int(n_trained_data / batch_size)
-                model = SMF(sess, M, latent_dim, learning_rate=learning_rate, batch_size=batch_size, reg_lambda=reg_lambda)
+                model = SMF(sess, M, latent_dim, learning_rate=learning_rate, batch_size=batch_size,
+                            reg_lambda=reg_lambda)
                 best_rmse, best_mae = model.train_test_validation(
-                    M, train_idx=train_idx, test_idx=test_idx, valid_idx=valid_idx, n_steps=n_steps, result_path=result_path)
+                    M, train_idx=train_idx, test_idx=test_idx, valid_idx=valid_idx, n_steps=n_steps,
+                    result_path=result_path)
 
                 print("Best RMSE = {0}, best MAE = {1}".format(best_rmse, best_mae))
                 with open('result.csv', 'a') as f:
-                    f.write("{0},{1},{2},{3},{4},{5}\n".format(learning_rate, batch_size, reg_lambda, latent_dim, best_rmse, best_mae))
+                    f.write(
+                        "{0},{1},{2},{3},{4},{5}\n".format(learning_rate, batch_size, reg_lambda, latent_dim, best_rmse,
+                                                           best_mae))
         tf.reset_default_graph()
+
 
 if __name__ == '__main__':
     train_test_validation()
